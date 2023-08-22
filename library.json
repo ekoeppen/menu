@@ -1,0 +1,21 @@
+{
+  "name": "menu",
+  "version": "0.1.0",
+  "description": "Simple text based menu",
+  "keywords": "c++, menu",
+  "repository": {
+    "type": "git",
+    "url": "https://gitlab.com/40hz/cpp/menu.git"
+  },
+  "authors": {
+    "name": "Eckhart Koeppen",
+    "email": "eck@40hz.org",
+    "url": "https://40hz.org/"
+  },
+  "license": "MIT",
+  "homepage": "https://gitlab.com/40hz/cpp/menu",
+  "dependencies": {
+    "name": "accept",
+    "version": "https://gitlab.com/40hz/cpp/accept.git @ ^0.1.2"
+  }
+}
