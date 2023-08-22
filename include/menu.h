@@ -68,9 +68,13 @@ public:
       write(static_cast<uint8_t>(i + '0'));
       print(std::span{") "});
       print(std::span{m->title});
+      if (m->action == Item::Submenu) {
+        print(std::span{"..."});
+      }
       write('\n');
       ++i;
     }
+    print(std::span{"\n> "});
     displayNeeded = false;
   }
 
@@ -87,8 +91,8 @@ public:
     unsigned int selection = c - 48;
     if (selection >= 1 && selection <= menu->submenu.size()) {
       auto selected = menu->submenu[selection - 1];
+      menuId = selected->id;
       if (selected->action == Item::Command) {
-        menuId = selected->id;
         r = Command;
       } else {
         if (current < depth(rootMenu) - 1) {
@@ -122,6 +126,7 @@ public:
   auto handle(char c) -> Result {
     switch (menuStack[current]->action) {
     case Item::Submenu:
+      write(c);
       return select(c);
     case Item::Input:
       return input(c);
