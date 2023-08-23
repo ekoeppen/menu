@@ -127,6 +127,7 @@ public:
     switch (menuStack[current]->action) {
     case Item::Submenu:
       write(c);
+      write(10);
       return select(c);
     case Item::Input:
       return input(c);
