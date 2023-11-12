@@ -38,43 +38,38 @@ consteval auto maxWidth(Item const *const menu, size_t n) -> size_t {
   return n;
 }
 
-template <Item const *const rootMenu, auto write, size_t inputSize> class State {
+template <Item const *const rootMenu, size_t inputSize, typename Output> class State {
 public:
   enum Result { Select, Command, Input };
 
   uint32_t menuId;
-  accept::Accept<inputSize, write> accept;
+  const Output &output;
+  accept::Accept<inputSize, Output> accept{output};
 
-  State() { menuStack[0] = rootMenu; }
-
-  template <typename S> auto print(S const s) {
-    for (auto c : s) {
-      write(c);
-    }
-  }
+  State(const Output &o) : output(o) { menuStack[0] = rootMenu; }
 
   auto display() -> void {
     if (!displayNeeded) {
       return;
     }
     auto menu = menuStack[current];
-    print(std::span{"\n\x1b[4;1m"});
-    print(std::span{menu->title});
+    output.write(std::span{"\n\x1b[4;1m"});
+    output.write(std::span{menu->title});
     for (size_t n = 0; n < maxWidth(rootMenu, 0) + 3 - menu->title.size(); n++) {
-      write(' ');
+      output.send(' ');
     }
-    print(std::span{"\x1b[0m\n\n"});
+    output.write(std::span{"\x1b[0m\n\n"});
     for (uint8_t i = 1; auto m : menu->submenu) {
-      write(static_cast<uint8_t>(i + '0'));
-      print(std::span{") "});
-      print(std::span{m->title});
+      output.send(static_cast<uint8_t>(i + '0'));
+      output.write(std::span{") "});
+      output.write(std::span{m->title});
       if (m->action == Item::Submenu) {
-        print(std::span{"..."});
+        output.write(std::span{"..."});
       }
-      write('\n');
+      output.send('\n');
       ++i;
     }
-    print(std::span{"\n> "});
+    output.write(std::span{"\n> "});
     displayNeeded = false;
   }
 
@@ -126,8 +121,8 @@ public:
   auto handle(char c) -> Result {
     switch (menuStack[current]->action) {
     case Item::Submenu:
-      write(c);
-      write(10);
+      output.send(c);
+      output.send(10);
       return select(c);
     case Item::Input:
       return input(c);
