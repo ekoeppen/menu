@@ -4,6 +4,8 @@
 #include "board.h"
 #include "menu.h"
 
+using namespace remix;
+
 constexpr menu::Item mode{.title = "Mode", .action = menu::Item::Input};
 constexpr menu::Item txInterval{.title = "Transmit interval", .action = menu::Item::Input};
 constexpr menu::Item txData{.title = "Transmit data", .action = menu::Item::Input};
@@ -23,8 +25,6 @@ constexpr menu::Item toplevel{
     .submenu = toplevelItems,
 };
 
-auto serial_write(uint8_t c) -> void { board::serial.send(c); }
-
 auto main() -> int {
   board::init();
   board::led.init();
@@ -33,24 +33,23 @@ auto main() -> int {
   board::rx.init();
   board::serial.init();
 
-  auto menu = menu::State<&toplevel, serial_write, 40>();
-  menu.display();
-  using State = decltype(menu);
+  auto menu = menu::State<&toplevel, 40, decltype(board::serial)>(board::serial);
   while (true) {
     menu.display();
-    switch (menu.handle(board::serial.receive())) {
-    case State::Select:
-      break;
-    case State::Command:
-      board::serial.write(std::span{"Command "});
-      board::serial.send(static_cast<uint8_t>(menu.menuId + '0'));
-      board::serial.send(10);
-      break;
-    case State::Input:
-      board::serial.write(std::span{"\nInput: "});
-      board::serial.write(menu.accept.accepted());
-      break;
-    }
+    auto r = menu.handle(board::serial.receive());
+    std::visit(menu::overload{
+                   [](menu::Command cmd) {
+                     board::serial.write(std::span{"Command "});
+                     board::serial.send(static_cast<uint8_t>(cmd.command + '0'));
+                     board::serial.send(10);
+                   },
+                   [](menu::Input input) {
+                     board::serial.write(std::span{"\nInput: "});
+                     board::serial.write(input.input);
+                   },
+                   []([[maybe_unused]] menu::Select select) {},
+               },
+               r);
   }
 
   return 0;

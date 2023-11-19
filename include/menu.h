@@ -1,6 +1,7 @@
 #include <array>
 #include <span>
 #include <string>
+#include <variant>
 
 #include "accept.h"
 
@@ -38,10 +39,24 @@ consteval auto maxWidth(Item const *const menu, size_t n) -> size_t {
   return n;
 }
 
+struct Select {};
+
+struct Command {
+  uint32_t command;
+};
+
+struct Input {
+  std::span<uint8_t> input;
+};
+
+typedef std::variant<Select, Command, Input> Result;
+template <class... Ts> struct overload : Ts... {
+  using Ts::operator()...;
+};
+template <class... Ts> overload(Ts...) -> overload<Ts...>;
+
 template <Item const *const rootMenu, size_t inputSize, typename Output> class State {
 public:
-  enum Result { Select, Command, Input };
-
   uint32_t menuId;
   const Output &output;
   accept::Accept<inputSize, Output> accept{output};
@@ -54,7 +69,7 @@ public:
     }
     auto menu = menuStack[current];
     output.write(std::span{"\n\x1b[4;1m"});
-    output.write(std::span{menu->title});
+    output.write(menu->title);
     for (size_t n = 0; n < maxWidth(rootMenu, 0) + 3 - menu->title.size(); n++) {
       output.send(' ');
     }
@@ -62,7 +77,7 @@ public:
     for (uint8_t i = 1; auto m : menu->submenu) {
       output.send(static_cast<uint8_t>(i + '0'));
       output.write(std::span{") "});
-      output.write(std::span{m->title});
+      output.write(m->title);
       if (m->action == Item::Submenu) {
         output.write(std::span{"..."});
       }
@@ -81,14 +96,20 @@ public:
   }
 
   auto select(char c) -> Result {
-    Result r = Select;
     auto menu = menuStack[current];
     unsigned int selection = c - 48;
+
+    displayNeeded = true;
+    if (selection == 0) {
+      back();
+      return Result{Select{}};
+    }
+
     if (selection >= 1 && selection <= menu->submenu.size()) {
       auto selected = menu->submenu[selection - 1];
       menuId = selected->id;
       if (selected->action == Item::Command) {
-        r = Command;
+        return Result{Command{menuId}};
       } else {
         if (current < depth(rootMenu) - 1) {
           ++current;
@@ -98,24 +119,17 @@ public:
           accept.reset();
         }
       }
-    } else {
-      if (selection == 0) {
-        back();
-      }
+      return Result{Select{}};
     }
-    displayNeeded = true;
-    return r;
+    return Result{Select{}};
   }
 
   auto input(uint8_t c) -> Result {
-    switch (accept.handle(c)) {
-    case accept::Accepted:
+    if (accept.handle(c) == accept::Accepted) {
       back();
-      return Input;
-    default:
-      break;
+      return Result{Input{accept.accepted()}};
     }
-    return Select;
+    return Result{Select{}};
   }
 
   auto handle(char c) -> Result {
@@ -129,7 +143,7 @@ public:
     default:
       break;
     }
-    return Select;
+    return Result{Select{}};
   }
 
 protected:
