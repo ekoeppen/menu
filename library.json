@@ -16,6 +16,6 @@
   "homepage": "https://gitlab.com/40hz/cpp/menu",
   "dependencies": {
     "name": "accept",
-    "version": "https://gitlab.com/40hz/cpp/accept.git#0.3.1"
+    "version": "https://gitlab.com/40hz/cpp/accept.git#0.3.2"
   }
 }
