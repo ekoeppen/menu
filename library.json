@@ -1,6 +1,6 @@
 {
   "name": "menu",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "description": "Simple text based menu",
   "keywords": "c++, menu",
   "repository": {
@@ -16,6 +16,6 @@
   "homepage": "https://gitlab.com/40hz/cpp/menu",
   "dependencies": {
     "name": "accept",
-    "version": "https://gitlab.com/40hz/cpp/accept.git @ ^0.3.1"
+    "version": "https://gitlab.com/40hz/cpp/accept.git#0.3.1"
   }
 }
