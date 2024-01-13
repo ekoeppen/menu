@@ -47,6 +47,7 @@ struct Command {
 
 struct Input {
   std::span<uint8_t> input;
+  uint32_t id;
 };
 
 typedef std::variant<Select, Command, Input> Result;
@@ -127,7 +128,7 @@ public:
   auto input(uint8_t c) -> Result {
     if (accept.handle(c) == accept::Accepted) {
       back();
-      return Result{Input{accept.accepted()}};
+      return Result{Input{accept.accepted(), menuId}};
     }
     return Result{Select{}};
   }
