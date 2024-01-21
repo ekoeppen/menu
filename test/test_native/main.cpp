@@ -7,10 +7,11 @@
 
 using namespace menu;
 
-int main(int argc, char **argv) {
-  doctest::Context context;
-  context.setOption("success", true);
-  context.setOption("no-exitcode", true);
-  context.applyCommandLine(argc, argv);
-  return context.run();
+int main(int argc, char** argv)
+{
+    doctest::Context context;
+    context.setOption("success", true);
+    context.setOption("no-exitcode", true);
+    context.applyCommandLine(argc, argv);
+    return context.run();
 }

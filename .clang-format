@@ -1,1 +1,9 @@
+BasedOnStyle: WebKit
+AlignConsecutiveDeclarations:
+  PadOperators:    false
+AllowShortBlocksOnASingleLine: Never
+AlwaysBreakTemplateDeclarations: Yes
 ColumnLimit: 100
+NamespaceIndentation: None
+SpaceAfterTemplateKeyword: false
+SpaceInEmptyBlock: false
