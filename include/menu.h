@@ -37,20 +37,25 @@ public:
             return;
         }
         auto menu = menuStack[current];
-        output.write(std::span { "\n\x1b[4;1m" });
+        output.write(std::span { "\x1b[H\x1b[K\n \x1b[4;1m" });
         output.write(menu->title);
-        output.write(std::span { "\x1b[0m\n\n" });
-        for (uint8_t i = 1; auto m : menu->submenu) {
+        output.write(std::span { "\x1b[0m\x1b[K\n\x1b[K\n\x1b[K" });
+        uint8_t i;
+        for (i = 1; auto m : menu->submenu) {
+            output.send(' ');
             output.send(static_cast<uint8_t>(i + '0'));
             output.write(std::span { ") " });
             output.write(m->title);
             if (m->action == Item::Submenu) {
                 output.write(std::span { "..." });
             }
-            output.send('\n');
+            output.write(std::span{"\n\x1b[K"});
             ++i;
         }
-        output.write(std::span { "\n> " });
+        for (; i < 11; i++) {
+            output.write(std::span{"\n\x1b[K"});
+        }
+        output.write(std::span { " > \x1b[K" });
         displayNeeded = false;
     }
 
