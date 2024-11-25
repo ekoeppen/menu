@@ -49,11 +49,11 @@ public:
             if (m->action == Item::Submenu) {
                 output.write(std::span { "..." });
             }
-            output.write(std::span{"\n\x1b[K"});
+            output.write(std::span { "\n\x1b[K" });
             ++i;
         }
         for (; i < 11; i++) {
-            output.write(std::span{"\n\x1b[K"});
+            output.write(std::span { "\n\x1b[K" });
         }
         output.write(std::span { " > \x1b[K" });
         displayNeeded = false;

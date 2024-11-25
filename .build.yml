@@ -1,0 +1,28 @@
+image: debian/stable
+secrets:
+  - fa19c627-c19e-46f1-9257-30f9a6f15516
+environment:
+  REPO: menu
+packages:
+  - clang-format-16
+  - python3-venv
+sources:
+  - https://git.sr.ht/~ekoeppen/menu
+tasks:
+  - lint: |
+      cd $REPO
+      find test include examples -name '*.h' -o -name '*.hpp'  -o -name '*.c' -o -name '*.cpp' | xargs clang-format-16 -n -Werror
+  - platformio: |
+      python3 -m venv $HOME/.local
+      $HOME/.local/bin/pip3 install platformio
+  - test: |
+      cd $REPO
+      $HOME/.local/bin/pio test -e native
+  - mirror-to-github: |
+      if [ "$GIT_REF" == "refs/heads/main" ] && [ -e "$HOME/.token" ]
+      then
+        cd $REPO
+        set +x
+        git push --mirror "https://ekoeppen:$(cat $HOME/.token)@github.com/ekoeppen/$REPO"
+      fi
+
