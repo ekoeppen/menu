@@ -1,6 +1,6 @@
 {
   "name": "menu",
-  "version": "0.5.2",
+  "version": "0.5.3",
   "description": "Simple text based menu",
   "keywords": "c++, menu",
   "repository": {
@@ -14,8 +14,5 @@
   },
   "license": "MIT",
   "homepage": "https://git.sr.ht/~ekoeppen/menu",
-  "dependencies": {
-    "name": "accept",
-    "version": "https://git.sr.ht/~ekoeppen/accept#0.3.2"
-  }
+  "dependencies": ["ekoeppen/accept"]
 }
